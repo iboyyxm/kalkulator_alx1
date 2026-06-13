@@ -793,6 +793,30 @@
                 <input type="range" id="smooth" min="1.0" max="10.0" step="0.1" oninput="updateUI('smooth')" onchange="updateSettings()">
             </div>
 
+            <div class="slider-container">
+                <div class="slider-header">
+                    <span class="slider-title">Game Width (Resolution)</span>
+                    <span class="slider-val" id="gameWidthValue">1920</span>
+                </div>
+                <input type="range" id="gameWidth" min="640" max="3840" step="1" oninput="updateUI('gameWidth')" onchange="updateSettings()">
+            </div>
+
+            <div class="slider-container">
+                <div class="slider-header">
+                    <span class="slider-title">Game Height (Resolution)</span>
+                    <span class="slider-val" id="gameHeightValue">1080</span>
+                </div>
+                <input type="range" id="gameHeight" min="480" max="2160" step="1" oninput="updateUI('gameHeight')" onchange="updateSettings()">
+            </div>
+
+            <div class="slider-container">
+                <div class="slider-header">
+                    <span class="slider-title">Max Inference FPS (120fps Fix)</span>
+                    <span class="slider-val" id="maxInferenceFpsValue">90</span>
+                </div>
+                <input type="range" id="maxInferenceFps" min="30" max="144" step="1" oninput="updateUI('maxInferenceFps')" onchange="updateSettings()">
+            </div>
+
             <!-- Legit vs Rage presets -->
             <div class="preset-buttons">
                 <button class="btn btn-secondary" onclick="applyPreset('legit')">
@@ -1058,6 +1082,10 @@
                 document.getElementById('triggerHoldMin').value = data.triggerHoldMin;
                 document.getElementById('triggerHoldMax').value = data.triggerHoldMax;
                 
+                if (data.gameWidth !== undefined) document.getElementById('gameWidth').value = data.gameWidth;
+                if (data.gameHeight !== undefined) document.getElementById('gameHeight').value = data.gameHeight;
+                if (data.maxInferenceFps !== undefined) document.getElementById('maxInferenceFps').value = data.maxInferenceFps;
+                
                 // Propagate values to the display bubbles
                 updateUI('fov');
                 updateUI('smooth');
@@ -1068,6 +1096,9 @@
                 updateUI('triggerDelayMax');
                 updateUI('triggerHoldMin');
                 updateUI('triggerHoldMax');
+                updateUI('gameWidth');
+                updateUI('gameHeight');
+                updateUI('maxInferenceFps');
                 
                 // UI feedback updates
                 const statusDot = document.getElementById('statusDot');
@@ -1156,7 +1187,10 @@
             triggerDelayMin: parseInt(document.getElementById('triggerDelayMin').value),
             triggerDelayMax: parseInt(document.getElementById('triggerDelayMax').value),
             triggerHoldMin: parseInt(document.getElementById('triggerHoldMin').value),
-            triggerHoldMax: parseInt(document.getElementById('triggerHoldMax').value)
+            triggerHoldMax: parseInt(document.getElementById('triggerHoldMax').value),
+            gameWidth: parseInt(document.getElementById('gameWidth').value),
+            gameHeight: parseInt(document.getElementById('gameHeight').value),
+            maxInferenceFps: parseInt(document.getElementById('maxInferenceFps').value)
         };
 
         try {
