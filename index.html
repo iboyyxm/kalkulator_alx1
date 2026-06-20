@@ -1291,6 +1291,22 @@
                 </label>
             </div>
 
+            <div class="setting-row">
+                <span class="row-label">Draw FOV Circle</span>
+                <label class="switch">
+                    <input type="checkbox" id="drawFOV" onchange="updateSettings()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-row">
+                <span class="row-label">Draw Detection Boxes</span>
+                <label class="switch">
+                    <input type="checkbox" id="drawBoxes" onchange="updateSettings()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
             <div class="input-group">
                 <label class="input-label" for="aimbotKey">Activation Hotkey</label>
                 <div class="input-field-wrapper">
@@ -1366,7 +1382,7 @@
                     <span class="slider-title">Mouse Sensitivity Scale</span>
                     <span class="slider-val" id="sensitivityScaleValue">0.45</span>
                 </div>
-                <input type="range" id="sensitivityScale" min="0.10" max="3.00" step="0.05" oninput="updateUI('sensitivityScale')" onchange="updateSettings()">
+                <input type="range" id="sensitivityScale" min="0.10" max="10.00" step="0.05" oninput="updateUI('sensitivityScale')" onchange="updateSettings()">
             </div>
 
             <div class="slider-container">
@@ -1374,7 +1390,7 @@
                     <span class="slider-title">Max Inference FPS</span>
                     <span class="slider-val" id="maxInferenceFpsValue">90</span>
                 </div>
-                <input type="range" id="maxInferenceFps" min="30" max="144" step="1" oninput="updateUI('maxInferenceFps')" onchange="updateSettings()">
+                <input type="range" id="maxInferenceFps" min="30" max="1000" step="1" oninput="updateUI('maxInferenceFps')" onchange="updateSettings()">
             </div>
 
             <div class="slider-container">
@@ -1392,23 +1408,13 @@
                 </div>
                 <input type="range" id="aimOffsetX" min="-50.0" max="50.0" step="0.5" oninput="updateUI('aimOffsetX')" onchange="updateSettings()">
             </div>
-
             <div class="slider-container">
                 <div class="slider-header">
-                    <span class="slider-title">Max Inference FPS (120fps Fix)</span>
-                    <span class="slider-val" id="maxInferenceFpsValue">90</span>
+                    <span class="slider-title">Confidence Threshold</span>
+                    <span class="slider-val" id="confidenceThresholdValue">0.35</span>
                 </div>
-                <input type="range" id="maxInferenceFps" min="30" max="144" step="1" oninput="updateUI('maxInferenceFps')" onchange="updateSettings()">
+                <input type="range" id="confidenceThreshold" min="0.10" max="0.90" step="0.01" oninput="updateUI('confidenceThreshold')" onchange="updateSettings()">
             </div>
-
-            <div class="slider-container">
-                <div class="slider-header">
-                    <span class="slider-title">OBS Latency Compensation (ms)</span>
-                    <span class="slider-val" id="obsLatencyMsValue">60</span>
-                </div>
-                <input type="range" id="obsLatencyMs" min="0" max="150" step="1" oninput="updateUI('obsLatencyMs')" onchange="updateSettings()">
-            </div>
-
             <!-- Legit vs Rage presets -->
             <div class="preset-buttons">
                 <button class="btn btn-secondary" onclick="applyPreset('legit')">
@@ -1564,13 +1570,13 @@
                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                         <circle cx="12" cy="13" r="4"></circle>
                     </svg>
-                    <div>Enable Live Stream to view Spout feed and AI detections</div>
+                    <div>Enable Live Stream to view AI detections</div>
                 </div>
             </div>
             
             <div class="info-card" style="padding: 16px; background: rgba(0, 0, 0, 0.2); border-radius: 12px; border: 1px solid var(--panel-border); font-size: 13px; display: flex; flex-direction: column; gap: 8px;">
                 <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Sender Resolution:</span>
+                    <span style="color: var(--text-muted);">Capture Resolution:</span>
                     <span id="debugSenderRes" style="font-weight: 600; color: var(--text-primary);">-</span>
                 </div>
                 <div style="display: flex; justify-content: space-between;">
@@ -1689,6 +1695,8 @@
                 
                 // Set toggle switch states
                 document.getElementById('aimbotEnabled').checked = data.aimbotEnabled;
+                document.getElementById('drawFOV').checked = data.drawFOV !== undefined ? data.drawFOV : true;
+                document.getElementById('drawBoxes').checked = data.drawBoxes !== undefined ? data.drawBoxes : true;
                 document.getElementById('targetLock').checked = data.targetLock;
                 document.getElementById('humanizedSmooth').checked = data.humanizedSmooth;
                 document.getElementById('deadzoneEnabled').checked = data.deadzoneEnabled;
@@ -1740,9 +1748,9 @@
                 
                 if (data.maxInferenceFps !== undefined) document.getElementById('maxInferenceFps').value = data.maxInferenceFps;
                 if (data.sensitivityScale !== undefined) document.getElementById('sensitivityScale').value = data.sensitivityScale;
-                if (data.obsLatencyMs !== undefined) document.getElementById('obsLatencyMs').value = data.obsLatencyMs;
                 if (data.aimOffsetX !== undefined) document.getElementById('aimOffsetX').value = data.aimOffsetX;
                 if (data.aimOffsetY !== undefined) document.getElementById('aimOffsetY').value = data.aimOffsetY;
+                if (data.confidenceThreshold !== undefined) document.getElementById('confidenceThreshold').value = data.confidenceThreshold;
                 
                 // Propagate values to the display bubbles
                 updateUI('fov');
@@ -1757,9 +1765,9 @@
                 updateUI('triggerHoldMax');
                 updateUI('maxInferenceFps');
                 updateUI('sensitivityScale');
-                updateUI('obsLatencyMs');
                 updateUI('aimOffsetX');
                 updateUI('aimOffsetY');
+                updateUI('confidenceThreshold');
                 
                 // UI feedback updates with smooth animation
                 const statusDot = document.getElementById('statusDot');
@@ -1828,6 +1836,8 @@
 
         const payload = {
             aimbotEnabled: document.getElementById('aimbotEnabled').checked,
+            drawFOV: document.getElementById('drawFOV').checked,
+            drawBoxes: document.getElementById('drawBoxes').checked,
             targetLock: document.getElementById('targetLock').checked,
             humanizedSmooth: document.getElementById('humanizedSmooth').checked,
             deadzoneEnabled: document.getElementById('deadzoneEnabled').checked,
@@ -1852,9 +1862,9 @@
             triggerHoldMax: parseInt(document.getElementById('triggerHoldMax').value),
             maxInferenceFps: parseInt(document.getElementById('maxInferenceFps').value),
             sensitivityScale: parseFloat(document.getElementById('sensitivityScale').value),
-            obsLatencyMs: parseFloat(document.getElementById('obsLatencyMs').value),
             aimOffsetX: parseFloat(document.getElementById('aimOffsetX').value),
-            aimOffsetY: parseFloat(document.getElementById('aimOffsetY').value)
+            aimOffsetY: parseFloat(document.getElementById('aimOffsetY').value),
+            confidenceThreshold: parseFloat(document.getElementById('confidenceThreshold').value)
         };
 
         try {
@@ -1922,14 +1932,14 @@
                         const response = await fetch(`http://localhost:${currentPort}/api/debug_image?token=${currentToken}`);
                         if (response.ok) {
                             // Read statistics directly from custom HTTP Headers to avoid multiple concurrent API requests
-                            const spoutW = response.headers.get('X-Spout-Width');
-                            const spoutH = response.headers.get('X-Spout-Height');
+                            const screenW = response.headers.get('X-Screen-Width');
+                            const screenH = response.headers.get('X-Screen-Height');
                             const maxScore = response.headers.get('X-Max-Seen-Score');
                             const targetFound = response.headers.get('X-Target-Found') === 'true';
                             const aiFps = response.headers.get('X-AI-FPS');
 
-                            if (spoutW && spoutH) {
-                                document.getElementById('debugSenderRes').innerText = `${spoutW}x${spoutH}`;
+                            if (screenW && screenH) {
+                                document.getElementById('debugSenderRes').innerText = `${screenW}x${screenH}`;
                             } else {
                                 document.getElementById('debugSenderRes').innerText = 'Offline/Disconnected';
                             }
